@@ -14,6 +14,12 @@ jest.mock('../store/slices/artistsSlice', () => ({
   fetchArtists: jest.fn(),
 }));
 
+const RouterWrapper = ({ children }) => (
+  <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+    {children}
+  </BrowserRouter>
+);
+
 describe('Artists Component', () => {
   let store;
 
@@ -60,9 +66,9 @@ describe('Artists Component', () => {
   test('renders artists page with user name', () => {
     render(
       <Provider store={store}>
-        <BrowserRouter>
+        <RouterWrapper>
           <Artists />
-        </BrowserRouter>
+        </RouterWrapper>
       </Provider>
     );
 
@@ -73,9 +79,9 @@ describe('Artists Component', () => {
   test('displays artists list', () => {
     render(
       <Provider store={store}>
-        <BrowserRouter>
+        <RouterWrapper>
           <Artists />
-        </BrowserRouter>
+        </RouterWrapper>
       </Provider>
     );
 
@@ -101,9 +107,9 @@ describe('Artists Component', () => {
 
     render(
       <Provider store={store}>
-        <BrowserRouter>
+        <RouterWrapper>
           <Artists />
-        </BrowserRouter>
+        </RouterWrapper>
       </Provider>
     );
 
@@ -126,9 +132,9 @@ describe('Artists Component', () => {
 
     render(
       <Provider store={store}>
-        <BrowserRouter>
+        <RouterWrapper>
           <Artists />
-        </BrowserRouter>
+        </RouterWrapper>
       </Provider>
     );
 
@@ -138,9 +144,9 @@ describe('Artists Component', () => {
   test('displays placeholder for artists without images', () => {
     render(
       <Provider store={store}>
-        <BrowserRouter>
+        <RouterWrapper>
           <Artists />
-        </BrowserRouter>
+        </RouterWrapper>
       </Provider>
     );
 
@@ -154,9 +160,9 @@ describe('Artists Component', () => {
 
     render(
       <Provider store={store}>
-        <BrowserRouter>
+        <RouterWrapper>
           <Artists />
-        </BrowserRouter>
+        </RouterWrapper>
       </Provider>
     );
 

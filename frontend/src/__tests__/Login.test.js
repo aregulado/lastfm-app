@@ -16,6 +16,12 @@ jest.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
 }));
 
+const RouterWrapper = ({ children }) => (
+  <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+    {children}
+  </BrowserRouter>
+);
+
 describe('Login Component', () => {
   let store;
 
@@ -38,9 +44,9 @@ describe('Login Component', () => {
   test('renders login form', () => {
     render(
       <Provider store={store}>
-        <BrowserRouter>
+        <RouterWrapper>
           <Login />
-        </BrowserRouter>
+        </RouterWrapper>
       </Provider>
     );
 
@@ -63,9 +69,9 @@ describe('Login Component', () => {
 
     render(
       <Provider store={store}>
-        <BrowserRouter>
+        <RouterWrapper>
           <Login />
-        </BrowserRouter>
+        </RouterWrapper>
       </Provider>
     );
 

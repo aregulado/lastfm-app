@@ -7,6 +7,12 @@ import PrivateRoute from '../components/PrivateRoute';
 
 const mockStore = configureStore([]);
 
+const RouterWrapper = ({ children }) => (
+  <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+    {children}
+  </BrowserRouter>
+);
+
 describe('PrivateRoute Component', () => {
   test('renders children when authenticated', () => {
     localStorage.setItem('token', 'test-token');
@@ -20,11 +26,11 @@ describe('PrivateRoute Component', () => {
 
     const { getByText } = render(
       <Provider store={store}>
-        <BrowserRouter>
+        <RouterWrapper>
           <PrivateRoute>
             <div>Protected Content</div>
           </PrivateRoute>
-        </BrowserRouter>
+        </RouterWrapper>
       </Provider>
     );
 
@@ -44,11 +50,11 @@ describe('PrivateRoute Component', () => {
 
     const { queryByText } = render(
       <Provider store={store}>
-        <BrowserRouter>
+        <RouterWrapper>
           <PrivateRoute>
             <div>Protected Content</div>
           </PrivateRoute>
-        </BrowserRouter>
+        </RouterWrapper>
       </Provider>
     );
 
