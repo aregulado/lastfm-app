@@ -69,12 +69,6 @@ BACKEND_TEST_EXIT_CODE=$?
 if [ $BACKEND_TEST_EXIT_CODE -ne 0 ]; then
     echo "❌ Backend tests failed!"
     echo "⚠️  Application started but tests did not pass."
-docker-compose exec -T backend php artisan test
-BACKEND_TEST_EXIT_CODE=$?
-
-if [ $BACKEND_TEST_EXIT_CODE -ne 0 ]; then
-    echo "❌ Backend tests failed!"
-    echo "⚠️  Application started but tests did not pass."
 else
     echo "✅ Backend tests passed!"
 fi
