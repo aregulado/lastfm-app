@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🚀 Starting Last.fm Fullstack Application..."
+echo "🚀 Starting Last.fm Application..."
 
 # Check if Docker is running
 if ! docker info > /dev/null 2>&1; then
@@ -67,15 +67,14 @@ if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
     exit 1
 fi
 
-# Ensure database is seeded (idempotent)
-echo "🌱 Ensuring database is seeded..."
-docker-compose exec -T backend php artisan db:seed --force
-echo "✅ Database seeded"
-
 # Import artists from Last.fm (after credentials are configured)
 echo "🎵 Importing artists from Last.fm..."
 docker-compose exec -T backend php artisan lastfm:import
-echo "✅ Artists imported"
+if [ $? -eq 0 ]; then
+    echo "✅ Artists imported"
+else
+    echo "❌ Failed to import artists"
+fi
 
 # Run backend tests
 echo "🧪 Running backend tests..."
