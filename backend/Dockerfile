@@ -9,9 +9,11 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     libzip-dev \
+    libicu-dev \
     default-mysql-client
 
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
+RUN docker-php-ext-configure intl
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip intl
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
