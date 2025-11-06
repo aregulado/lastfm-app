@@ -17,20 +17,12 @@ else
     echo "✅ Backend .env file already exists"
 fi
 
-# Start Docker containers
-echo "📦 Starting Docker containers..."
-docker-compose up -d
-
-# Wait for database to be ready
-echo "⏳ Waiting for database to be ready..."
-sleep 10
-
-# Append Last.fm credentials to backend .env if not already present
+# Add Last.fm credentials to backend .env if not already present (BEFORE starting containers)
 echo "🔑 Configuring Last.fm API credentials..."
-if ! docker-compose exec -T backend grep -q "LASTFM_API_KEY" .env; then
-    docker-compose exec -T backend bash -c "echo '' >> .env"
-    docker-compose exec -T backend bash -c "echo 'LASTFM_API_KEY=57268979f6bc6ba3ffa7aab5a38486f6' >> .env"
-    docker-compose exec -T backend bash -c "echo 'LASTFM_SECRET=351d5649297e4d347d83afe48e74fa8c' >> .env"
+if ! grep -q "LASTFM_API_KEY" backend/.env; then
+    echo '' >> backend/.env
+    echo 'LASTFM_API_KEY=57268979f6bc6ba3ffa7aab5a38486f6' >> backend/.env
+    echo 'LASTFM_SECRET=351d5649297e4d347d83afe48e74fa8c' >> backend/.env
     echo "✅ Last.fm credentials added to .env"
 else
     echo "✅ Last.fm credentials already configured"
@@ -45,6 +37,14 @@ if ! docker-compose exec -T backend grep -q "APP_KEY=base64:" .env; then
 else
     echo "✅ APP_KEY already set"
 fi
+
+# Start Docker containers
+echo "📦 Starting Docker containers..."
+docker-compose up -d
+
+# Wait for database to be ready
+echo "⏳ Waiting for database to be ready..."
+sleep 10
 
 # Wait for entrypoint to complete (migrations, seeding)
 echo "⏳ Waiting for backend entrypoint to complete..."
