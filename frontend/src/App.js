@@ -48,7 +48,7 @@ function TokenHandler() {
 function App() {
   return (
     <Provider store={store}>
-      <Router future={{ v7_startTransition: true }}>
+      <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <TokenHandler />
         <Routes>
           <Route path="/login" element={<Login />} />
