@@ -48,7 +48,7 @@ function TokenHandler() {
 function App() {
   return (
     <Provider store={store}>
-      <Router>
+      <Router future={{ v7_startTransition: true }}>
         <TokenHandler />
         <Routes>
           <Route path="/login" element={<Login />} />
