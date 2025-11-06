@@ -9,8 +9,5 @@ php artisan migrate --force
 echo "Seeding database..."
 php artisan db:seed --force
 
-echo "Importing artists from Last.fm..."
-php artisan lastfm:import
-
 echo "Starting Laravel server..."
 php artisan serve --host=0.0.0.0 --port=8000

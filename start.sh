@@ -46,7 +46,7 @@ else
     echo "✅ APP_KEY already set"
 fi
 
-# Wait for entrypoint to complete (migrations, seeding, import)
+# Wait for entrypoint to complete (migrations, seeding)
 echo "⏳ Waiting for backend entrypoint to complete..."
 MAX_ATTEMPTS=60
 ATTEMPT=0
@@ -66,6 +66,16 @@ if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
     echo "❌ Backend failed to become ready in time"
     exit 1
 fi
+
+# Ensure database is seeded (idempotent)
+echo "🌱 Ensuring database is seeded..."
+docker-compose exec -T backend php artisan db:seed --force
+echo "✅ Database seeded"
+
+# Import artists from Last.fm (after credentials are configured)
+echo "🎵 Importing artists from Last.fm..."
+docker-compose exec -T backend php artisan lastfm:import
+echo "✅ Artists imported"
 
 # Run backend tests
 echo "🧪 Running backend tests..."
