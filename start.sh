@@ -46,20 +46,26 @@ else
     echo "✅ APP_KEY already set"
 fi
 
-# Run migrations
-echo "🗄️  Running database migrations..."
-docker-compose exec -T backend php artisan migrate --force
-echo "✅ Migrations completed"
+# Wait for entrypoint to complete (migrations, seeding, import)
+echo "⏳ Waiting for backend entrypoint to complete..."
+MAX_ATTEMPTS=60
+ATTEMPT=0
+while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+    if docker-compose exec -T backend php artisan inspire > /dev/null 2>&1; then
+        echo "✅ Backend is ready!"
+        break
+    fi
+    ATTEMPT=$((ATTEMPT + 1))
+    if [ $((ATTEMPT % 10)) -eq 0 ]; then
+        echo "   Still waiting... ($ATTEMPT/$MAX_ATTEMPTS)"
+    fi
+    sleep 2
+done
 
-# Seed database
-echo "🌱 Seeding database..."
-docker-compose exec -T backend php artisan db:seed --force
-echo "✅ Database seeded"
-
-# Import artists from Last.fm
-echo "🎵 Importing artists from Last.fm..."
-docker-compose exec -T backend php artisan lastfm:import
-echo "✅ Artists imported"
+if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
+    echo "❌ Backend failed to become ready in time"
+    exit 1
+fi
 
 # Run backend tests
 echo "🧪 Running backend tests..."
