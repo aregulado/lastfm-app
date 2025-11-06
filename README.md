@@ -54,7 +54,6 @@ lastfm-fullstack-app/
 │   ├── tests/                                 # PHPUnit tests
 │   ├── .env.example                          # Environment template
 │   ├── Dockerfile                            # Backend Docker configuration
-│   ├── entrypoint.sh                         # Docker entrypoint script
 │   └── composer.json                         # PHP dependencies
 │
 ├── frontend/                   # React Application

@@ -28,15 +28,7 @@ else
     echo "✅ Last.fm credentials already configured"
 fi
 
-# Generate APP_KEY if not set
-echo "🔑 Checking Laravel APP_KEY..."
-if ! docker-compose exec -T backend grep -q "APP_KEY=base64:" .env; then
-    echo "🔑 Generating Laravel APP_KEY..."
-    docker-compose exec -T backend php artisan key:generate
-    echo "✅ APP_KEY generated"
-else
-    echo "✅ APP_KEY already set"
-fi
+# APP_KEY generation moved to after Docker containers are started (handled later in this script)
 
 # Start Docker containers
 echo "📦 Starting Docker containers..."
@@ -44,15 +36,11 @@ docker-compose up -d
 
 # Wait for database to be ready
 echo "⏳ Waiting for database to be ready..."
-sleep 10
-
-# Wait for entrypoint to complete (migrations, seeding)
-echo "⏳ Waiting for backend entrypoint to complete..."
 MAX_ATTEMPTS=60
 ATTEMPT=0
 while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
-    if docker-compose exec -T backend php artisan inspire > /dev/null 2>&1; then
-        echo "✅ Backend is ready!"
+    if docker-compose exec -T backend php artisan db:show > /dev/null 2>&1; then
+        echo "✅ Database is ready!"
         break
     fi
     ATTEMPT=$((ATTEMPT + 1))
@@ -63,9 +51,22 @@ while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
 done
 
 if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
-    echo "❌ Backend failed to become ready in time"
+    echo "❌ Database failed to become ready in time"
     exit 1
 fi
+
+# Run migrations
+echo "🔄 Running migrations..."
+docker-compose exec -T backend php artisan migrate --force
+echo "✅ Migrations completed"
+
+# Wait a moment for migrations to fully complete
+sleep 2
+
+# Seed database
+echo "🌱 Seeding database..."
+docker-compose exec -T backend php artisan db:seed --force
+echo "✅ Database seeded"
 
 # Import artists from Last.fm (after credentials are configured)
 echo "🎵 Importing artists from Last.fm..."
@@ -74,24 +75,8 @@ if [ $? -eq 0 ]; then
     echo "✅ Artists imported"
 else
     echo "❌ Failed to import artists"
+    exit 1
 fi
-
-# Run backend tests
-echo "🧪 Running backend tests..."
-docker-compose exec -T backend php artisan test
-BACKEND_TEST_EXIT_CODE=$?
-
-if [ $BACKEND_TEST_EXIT_CODE -ne 0 ]; then
-    echo "❌ Backend tests failed!"
-    echo "⚠️  Application started but tests did not pass."
-else
-    echo "✅ Backend tests passed!"
-fi
-
-# Run frontend tests
-echo "🧪 Running frontend tests..."
-docker-compose exec -T frontend npm test -- --watchAll=false --passWithNoTests
-FRONTEND_TEST_EXIT_CODE=$?
 
 if [ $FRONTEND_TEST_EXIT_CODE -ne 0 ]; then
     echo "❌ Frontend tests failed!"

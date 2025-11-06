@@ -29,9 +29,6 @@ RUN composer dump-autoload --optimize
 
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-COPY entrypoint.sh /var/www/entrypoint.sh
-RUN chmod +x /var/www/entrypoint.sh
-
 EXPOSE 8000
 
-ENTRYPOINT ["/var/www/entrypoint.sh"]
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
