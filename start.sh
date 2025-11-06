@@ -8,6 +8,15 @@ if ! docker info > /dev/null 2>&1; then
     exit 1
 fi
 
+# Create backend .env file if it doesn't exist
+if [ ! -f backend/.env ]; then
+    echo "📝 Creating backend .env file from .env.example..."
+    cp backend/.env.example backend/.env
+    echo "✅ Backend .env file created"
+else
+    echo "✅ Backend .env file already exists"
+fi
+
 # Start Docker containers
 echo "📦 Starting Docker containers..."
 docker-compose up -d
@@ -25,6 +34,16 @@ if ! docker-compose exec -T backend grep -q "LASTFM_API_KEY" .env; then
     echo "✅ Last.fm credentials added to .env"
 else
     echo "✅ Last.fm credentials already configured"
+fi
+
+# Generate APP_KEY if not set
+echo "🔑 Checking Laravel APP_KEY..."
+if ! docker-compose exec -T backend grep -q "APP_KEY=base64:" .env; then
+    echo "🔑 Generating Laravel APP_KEY..."
+    docker-compose exec -T backend php artisan key:generate
+    echo "✅ APP_KEY generated"
+else
+    echo "✅ APP_KEY already set"
 fi
 
 # Run backend tests
