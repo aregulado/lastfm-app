@@ -46,8 +46,29 @@ else
     echo "✅ APP_KEY already set"
 fi
 
+# Run migrations
+echo "🗄️  Running database migrations..."
+docker-compose exec -T backend php artisan migrate --force
+echo "✅ Migrations completed"
+
+# Seed database
+echo "🌱 Seeding database..."
+docker-compose exec -T backend php artisan db:seed --force
+echo "✅ Database seeded"
+
+# Import artists from Last.fm
+echo "🎵 Importing artists from Last.fm..."
+docker-compose exec -T backend php artisan lastfm:import
+echo "✅ Artists imported"
+
 # Run backend tests
 echo "🧪 Running backend tests..."
+docker-compose exec -T backend php artisan test
+BACKEND_TEST_EXIT_CODE=$?
+
+if [ $BACKEND_TEST_EXIT_CODE -ne 0 ]; then
+    echo "❌ Backend tests failed!"
+    echo "⚠️  Application started but tests did not pass."
 docker-compose exec -T backend php artisan test
 BACKEND_TEST_EXIT_CODE=$?
 
