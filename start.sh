@@ -16,17 +16,40 @@ docker-compose up -d
 echo "⏳ Waiting for database to be ready..."
 sleep 10
 
-# Run migrations
-echo "🔄 Running database migrations..."
-docker-compose exec -T backend php artisan migrate --force
+# Append Last.fm credentials to backend .env if not already present
+echo "🔑 Configuring Last.fm API credentials..."
+if ! docker-compose exec -T backend grep -q "LASTFM_API_KEY" .env; then
+    docker-compose exec -T backend bash -c "echo '' >> .env"
+    docker-compose exec -T backend bash -c "echo 'LASTFM_API_KEY=57268979f6bc6ba3ffa7aab5a38486f6' >> .env"
+    docker-compose exec -T backend bash -c "echo 'LASTFM_SECRET=351d5649297e4d347d83afe48e74fa8c' >> .env"
+    echo "✅ Last.fm credentials added to .env"
+else
+    echo "✅ Last.fm credentials already configured"
+fi
 
-# Seed database
-echo "🌱 Seeding database..."
-docker-compose exec -T backend php artisan db:seed --force
+# Run backend tests
+echo "🧪 Running backend tests..."
+docker-compose exec -T backend php artisan test
+BACKEND_TEST_EXIT_CODE=$?
 
-# Import artists from Last.fm
-echo "🎵 Importing artists from Last.fm..."
-docker-compose exec -T backend php artisan lastfm:import
+if [ $BACKEND_TEST_EXIT_CODE -ne 0 ]; then
+    echo "❌ Backend tests failed!"
+    echo "⚠️  Application started but tests did not pass."
+else
+    echo "✅ Backend tests passed!"
+fi
+
+# Run frontend tests
+echo "🧪 Running frontend tests..."
+docker-compose exec -T frontend npm test -- --watchAll=false --passWithNoTests
+FRONTEND_TEST_EXIT_CODE=$?
+
+if [ $FRONTEND_TEST_EXIT_CODE -ne 0 ]; then
+    echo "❌ Frontend tests failed!"
+    echo "⚠️  Application started but tests did not pass."
+else
+    echo "✅ Frontend tests passed!"
+fi
 
 echo ""
 echo "✅ Application is ready!"
