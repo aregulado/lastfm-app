@@ -1,7 +1,11 @@
 #!/bin/bash
 
 echo "Waiting for database..."
-sleep 5
+until php artisan db:show > /dev/null 2>&1; do
+    echo "Database not ready, waiting..."
+    sleep 2
+done
+echo "Database is ready!"
 
 echo "Running migrations..."
 php artisan migrate --force
